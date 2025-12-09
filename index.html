@@ -10,8 +10,13 @@ body { font-family: Arial, sans-serif; margin: 0; background: #f5f5f5; }
 .sidebar h2 { margin-top: 0; font-size: 22px; text-align: center; }
 .content { margin-left: 240px; padding: 20px; }
 .card { background: #fff; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; margin-top: 10px; }
+input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; margin-top: 10px; margin-bottom: 10px; }
 .resultBox { margin-top: 10px; padding: 12px; background: #e8e8e8; border-radius: 6px; display: none; }
+.productList { width: 100%; border-collapse: collapse; margin-top: 10px; }
+.productList th, .productList td { padding: 8px; border-bottom: 1px solid #ccc; text-align: left; }
+.productList th { background: #f2f2f2; }
+.available { color: green; font-weight: bold; }
+.notAvailable { color: red; font-weight: bold; }
 </style>
 </head>
 <body>
@@ -30,6 +35,19 @@ input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; 
     <h3>Search Product</h3>
     <input type="text" id="search" placeholder="Type product name..." onkeyup="searchProduct()">
     <div id="resultBox" class="resultBox"></div>
+
+    <!-- Product list table -->
+    <table class="productList" id="productTable">
+      <thead>
+        <tr>
+          <th>Product Name</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Products will populate here -->
+      </tbody>
+    </table>
   </div>
 
   <div class="card">
@@ -63,7 +81,7 @@ input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; 
     try {
       const querySnapshot = await getDocs(collection(db, "product")); // collection name
       querySnapshot.forEach((doc) => {
-        if (doc.data().product) { // field name inside document
+        if (doc.data().product) {
           products.push(doc.data().product);
         }
       });
@@ -72,9 +90,27 @@ input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; 
     }
 
     document.getElementById("totalCount").textContent = products.length;
+    populateProductTable();
   }
 
-  fetchProducts();
+  function populateProductTable() {
+    const tbody = document.getElementById("productTable").querySelector("tbody");
+    tbody.innerHTML = "";
+
+    products.forEach(product => {
+      const tr = document.createElement("tr");
+      const tdName = document.createElement("td");
+      tdName.textContent = product;
+
+      const tdStatus = document.createElement("td");
+      tdStatus.textContent = "Available";
+      tdStatus.classList.add("available");
+
+      tr.appendChild(tdName);
+      tr.appendChild(tdStatus);
+      tbody.appendChild(tr);
+    });
+  }
 
   function searchProduct() {
     const input = document.getElementById("search").value.toLowerCase();
@@ -82,13 +118,33 @@ input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; 
 
     if (input === "") {
       resultBox.style.display = "none";
+      populateProductTable();
       return;
     }
 
     const found = products.some(item => item.toLowerCase() === input);
     resultBox.style.display = "block";
     resultBox.textContent = found ? "Product is AVAILABLE" : "Product is NOT available";
+
+    // Filter table for search
+    const tbody = document.getElementById("productTable").querySelector("tbody");
+    tbody.innerHTML = "";
+    products.filter(p => p.toLowerCase().includes(input)).forEach(product => {
+      const tr = document.createElement("tr");
+      const tdName = document.createElement("td");
+      tdName.textContent = product;
+
+      const tdStatus = document.createElement("td");
+      tdStatus.textContent = "Available";
+      tdStatus.classList.add("available");
+
+      tr.appendChild(tdName);
+      tr.appendChild(tdStatus);
+      tbody.appendChild(tr);
+    });
   }
+
+  fetchProducts();
 </script>
 
 </body>
