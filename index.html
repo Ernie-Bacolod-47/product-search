@@ -81,6 +81,7 @@ input, select, button { width: 100%; padding: 10px; margin-top: 10px; margin-bot
   const db = getFirestore(app);
   let products = [];
 
+  // Fetch products from Firestore
   async function fetchProducts() {
     products = [];
     try {
@@ -97,6 +98,7 @@ input, select, button { width: 100%; padding: 10px; margin-top: 10px; margin-bot
     populateProductTable(products);
   }
 
+  // Populate table with given list
   function populateProductTable(list) {
     const tbody = document.getElementById("productTable").querySelector("tbody");
     tbody.innerHTML = "";
@@ -113,6 +115,7 @@ input, select, button { width: 100%; padding: 10px; margin-top: 10px; margin-bot
     });
   }
 
+  // Search function with partial match
   function searchProduct() {
     const input = document.getElementById("search").value.toLowerCase();
     const resultBox = document.getElementById("resultBox");
@@ -123,10 +126,11 @@ input, select, button { width: 100%; padding: 10px; margin-top: 10px; margin-bot
     }
     const filtered = products.filter(p => p.name.toLowerCase().includes(input));
     resultBox.style.display = "block";
-    resultBox.textContent = filtered.length > 0 ? "Product(s) found" : "No product found";
+    resultBox.textContent = filtered.length > 0 ? `${filtered.length} product(s) found` : "No product found";
     populateProductTable(filtered);
   }
 
+  // Add product to Firestore
   async function addProduct() {
     const name = document.getElementById("newProductName").value.trim();
     const status = document.getElementById("newProductStatus").value;
@@ -145,7 +149,7 @@ input, select, button { width: 100%; padding: 10px; margin-top: 10px; margin-bot
     }
   }
 
-  // Attach the function to the button click
+  // Bind Add Product button
   document.getElementById("addButton").addEventListener("click", addProduct);
 
   // Initial fetch
