@@ -117,17 +117,29 @@ function populateProductTable(list) {
     });
 }
 
-// Live search pop-up
+// Live search pop-up with closest match on top
 function searchProduct() {
     const input = document.getElementById("search").value.toLowerCase();
     const resultBox = document.getElementById("resultBox");
     resultBox.innerHTML = "";
+
     if (input === "") {
         resultBox.style.display = "none";
         populateProductTable(products);
         return;
     }
-    const matches = products.filter(p => p.name.toLowerCase().includes(input));
+
+    let matches = products.filter(p => p.name.toLowerCase().includes(input));
+
+    // Sort: names starting with input appear first
+    matches.sort((a, b) => {
+        const aName = a.name.toLowerCase();
+        const bName = b.name.toLowerCase();
+        const aStarts = aName.startsWith(input) ? 0 : 1;
+        const bStarts = bName.startsWith(input) ? 0 : 1;
+        return aStarts - bStarts;
+    });
+
     if (matches.length > 0) {
         matches.forEach(match => {
             const div = document.createElement("div");
@@ -148,6 +160,8 @@ function searchProduct() {
         resultBox.appendChild(div);
         resultBox.style.display = "block";
     }
+
+    populateProductTable(matches);
 }
 
 // Add product
