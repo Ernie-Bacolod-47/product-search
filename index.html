@@ -3,71 +3,93 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Product Availability Search</title>
+<title>Product Dashboard</title>
 <style>
-body {
-font-family: Arial, sans-serif;
-padding: 20px;
-max-width: 600px;
-margin: auto;
-}
-h1 {
-text-align: center;
-}
-input {
-width: 100%;
-padding: 10px;
-font-size: 16px;
-border: 1px solid #ccc;
-border-radius: 6px;
-margin-bottom: 20px;
-}
-.result {
-padding: 15px;
-border-radius: 6px;
-background: #f2f2f2;
-display: none;
-}
+body { font-family: Arial, sans-serif; margin: 0; background: #f5f5f5; }
+.sidebar { width: 220px; background: #222; color: #fff; height: 100vh; position: fixed; padding: 20px; }
+.sidebar h2 { margin-top: 0; font-size: 22px; text-align: center; }
+.content { margin-left: 240px; padding: 20px; }
+.card { background: #fff; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; margin-top: 10px; }
+.resultBox { margin-top: 10px; padding: 12px; background: #e8e8e8; border-radius: 6px; display: none; }
 </style>
 </head>
 <body>
-<h1>Product Search</h1>
-<input type="text" id="search" placeholder="Search for a product..." onkeyup="searchProduct()" />
 
+<div class="sidebar">
+  <h2>Dashboard</h2>
+  <p>• Product Search</p>
+  <p>• Inventory Summary</p>
+  <p>• Status</p>
+</div>
 
-<div class="result" id="resultBox"></div>
+<div class="content">
+  <h1>Product Availability Dashboard</h1>
 
+  <div class="card">
+    <h3>Search Product</h3>
+    <input type="text" id="search" placeholder="Type product name..." onkeyup="searchProduct()">
+    <div id="resultBox" class="resultBox"></div>
+  </div>
 
-<script>
-const products = [
-"Laptop",
-"Keyboard",
-"Mouse",
-"USB Cable",
-"Monitor",
-"Headphones"
-];
+  <div class="card">
+    <h3>Inventory Overview</h3>
+    <p>Total products: <strong id="totalCount"></strong></p>
+  </div>
+</div>
 
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+  import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-function searchProduct() {
-const input = document.getElementById("search").value.toLowerCase();
-const resultBox = document.getElementById("resultBox");
+  const firebaseConfig = {
+    apiKey: "AIzaSyBtdJOHNsXDmnmhedb7V8wtKKWZWguHSbM",
+    authDomain: "joy-database-1885a.firebaseapp.com",
+    projectId: "joy-database-1885a",
+    storageBucket: "joy-database-1885a.firebasestorage.app",
+    messagingSenderId: "1099263263320",
+    appId: "1:1099263263320:web:43d03d8f3aaf52c1d7c02d",
+    measurementId: "G-J563DNJKPF"
+  };
 
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
 
-if (input === "") {
-resultBox.style.display = "none";
-return;
-}
+  let products = [];
 
+  async function fetchProducts() {
+    products = [];
+    try {
+      const querySnapshot = await getDocs(collection(db, "product")); // collection name
+      querySnapshot.forEach((doc) => {
+        if (doc.data().product) { // field name inside document
+          products.push(doc.data().product);
+        }
+      });
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    }
 
-const found = products.some(item => item.toLowerCase() === input);
+    document.getElementById("totalCount").textContent = products.length;
+  }
 
+  fetchProducts();
 
-resultBox.style.display = "block";
-resultBox.textContent = found
-? "Product is AVAILABLE"
-: "Product is NOT available";
-}
+  function searchProduct() {
+    const input = document.getElementById("search").value.toLowerCase();
+    const resultBox = document.getElementById("resultBox");
+
+    if (input === "") {
+      resultBox.style.display = "none";
+      return;
+    }
+
+    const found = products.some(item => item.toLowerCase() === input);
+    resultBox.style.display = "block";
+    resultBox.textContent = found ? "Product is AVAILABLE" : "Product is NOT available";
+  }
 </script>
+
 </body>
 </html>
