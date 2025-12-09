@@ -54,7 +54,7 @@ input, select, button { width: 100%; padding: 10px; margin-top: 10px; margin-bot
       <option value="available">Available</option>
       <option value="notAvailable">Not Available</option>
     </select>
-    <button onclick="addProduct()">Add Product</button>
+    <button id="addButton">Add Product</button>
   </div>
 
   <div class="card">
@@ -63,7 +63,6 @@ input, select, button { width: 100%; padding: 10px; margin-top: 10px; margin-bot
   </div>
 </div>
 
-<!-- Firebase SDK -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
   import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
@@ -80,7 +79,6 @@ input, select, button { width: 100%; padding: 10px; margin-top: 10px; margin-bot
 
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
-
   let products = [];
 
   async function fetchProducts() {
@@ -132,25 +130,25 @@ input, select, button { width: 100%; padding: 10px; margin-top: 10px; margin-bot
   async function addProduct() {
     const name = document.getElementById("newProductName").value.trim();
     const status = document.getElementById("newProductStatus").value;
-
     if (!name) {
       alert("Please enter a product name");
       return;
     }
-
     try {
-      await addDoc(collection(db, "product"), {
-        product: name,
-        status: status
-      });
+      await addDoc(collection(db, "product"), { product: name, status: status });
       document.getElementById("newProductName").value = "";
       document.getElementById("newProductStatus").value = "available";
       fetchProducts(); // refresh table
     } catch (error) {
-      console.error("Error adding product:", error);
+      alert("Error adding product: " + error.message);
+      console.error(error);
     }
   }
 
+  // Attach the function to the button click
+  document.getElementById("addButton").addEventListener("click", addProduct);
+
+  // Initial fetch
   fetchProducts();
 </script>
 
